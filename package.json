@@ -1,0 +1,35 @@
+{
+  "name": "brain-agriculture",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "npx mocha -w --parallel **/**/*.test.js",
+    "test:cov": "npx nyc npx mocha --parallel **/**/*.test.js",
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "engines": {
+    "node": "20.11.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "pg": "^8.11.5",
+    "typeorm": "^0.3.20"
+  },
+  "devDependencies": {
+    "chai": "^5.1.0",
+    "faker": "^6.6.6",
+    "mocha": "^10.4.0",
+    "nyc": "^15.1.0",
+    "sinon": "^17.0.1"
+  }
+}
