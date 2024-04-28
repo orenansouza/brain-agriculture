@@ -20,12 +20,14 @@ exports.create = async (payload) => {
     }
   }
 
-  if (payload.cultivable_area + payload.vegetation_area > payload.total_area) {
-    return {
-      error: true,
-      statusCode: 400,
-      errors: ['Área de cultivação com área de vegetação maior que área total']
-    }
+  const validate_area = validateArea({
+    cultivable_area: payload.cultivable_area,
+    vegetation_area: payload.vegetation_area,
+    total_area: payload.total_area
+  })
+
+  if (validate_area.error) {
+    return validate_area
   }
 
   try {
@@ -37,6 +39,105 @@ exports.create = async (payload) => {
   } catch (error) {
     return error
   }
+}
+
+exports.findAll = async ({ page, limit }) => {
+  const skip = (page - 1) * limit
+
+  try {
+    const result = await prisma.producer.findMany({
+      skip,
+      take: limit
+    })
+    return {
+      content: result,
+      pagination: {
+        page,
+        limit,
+        totalPage: result.length,
+        totalItems: await prisma.producer.count()
+      }
+    }
+  } catch (error) {
+    return error
+  }
+}
+
+exports.update = async (id, payload) => {
+  if (!id) {
+    return {
+      error: true,
+      statusCode: 400,
+      errors: ['ID é obrigatório']
+    }
+  }
+
+  const producer = await prisma.producer.findUnique({ where: { id: Number(id) } })
+  if (!producer) {
+    return {
+      error: true,
+      statusCode: 400,
+      errors: ['ID informado não existe']
+    }
+  }
+
+  if (payload.cultivable_area || payload.vegetation_area || payload.total_area) {
+    const validate_area = validateArea({
+      cultivable_area: payload.cultivable_area || producer.cultivable_area,
+      vegetation_area: payload.vegetation_area || producer.vegetation_area,
+      total_area: payload.total_area || producer.total_area
+    })
+
+    if (validate_area.error) {
+      return validate_area
+    }
+  }
+
+  try {
+    const producerUpdated = await prisma.producer.update({
+      where: { id: Number(id) },
+      data: { ...payload }
+    })
+    return producerUpdated
+  } catch (error) {
+    return error
+  }
+}
+
+exports.delete = async (id) => {
+  if (!id) {
+    return {
+      error: true,
+      statusCode: 400,
+      errors: ['ID é obrigatório']
+    }
+  }
+
+  const producer = await prisma.producer.findUnique({ where: { id: Number(id) } })
+  if (!producer) {
+    return {
+      error: true,
+      statusCode: 400,
+      errors: ['ID informado não existe']
+    }
+  }
+
+  try {
+    return prisma.producer.delete({ where: { id: Number(id) } })
+  } catch (error) {
+    return error
+  }
+}
+
+function validateArea({ cultivable_area, vegetation_area, total_area }) {
+  if (cultivable_area + vegetation_area > total_area) {
+    return {
+      error: true,
+      statusCode: 400,
+      errors: ['Área de cultivação com área de vegetação maior que área total']
+    }
+  }
+  return { error: false }
 }
 
 const schema = yup.object().shape({

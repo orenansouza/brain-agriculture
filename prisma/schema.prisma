@@ -8,7 +8,7 @@ generator client {
 }
 
 model Producer {
-  id               Int    @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   cpf_cnpj         Float
   producer_name    String
   farm_name        String
@@ -18,4 +18,6 @@ model Producer {
   cultivable_area  Float
   vegetation_area  Float
   cultivation_name String
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 }
